@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mystery Case: The Missing Key</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: Arial, Helvetica, sans-serif;
+        background:
+            radial-gradient(circle at top, #243047 0%, #101522 45%, #080b12 100%);
+        color: #f3f5f8;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .game {
+        width: min(760px, 100%);
+        background: rgba(18, 23, 34, 0.96);
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 24px;
+        box-shadow: 0 25px 70px rgba(0,0,0,0.45);
+        overflow: hidden;
+    }
+
+    .top {
+        padding: 24px 26px 18px;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .case-label {
+        font-size: 12px;
+        letter-spacing: 2px;
+        color: #9ca9bd;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+    }
+
+    h1 {
+        margin: 0;
+        font-size: clamp(25px, 5vw, 38px);
+        letter-spacing: -1px;
+    }
+
+    .subtitle {
+        margin: 8px 0 0;
+        color: #aeb8c8;
+        line-height: 1.5;
+    }
+
+    .stats {
+        display: flex;
+        gap: 10px;
+        margin-top: 18px;
+        flex-wrap: wrap;
+    }
+
+    .stat {
+        background: rgba(255,255,255,0.06);
+        padding: 8px 12px;
+        border-radius: 10px;
+        font-size: 13px;
+        color: #cbd3df;
+    }
+
+    .content {
+        padding: 26px;
+    }
+
+    .progress-wrap {
+        margin-bottom: 22px;
+    }
+
+    .progress-info {
+        display: flex;
+        justify-content: space-between;
+        color: #9da8b9;
+        font-size: 13px;
+        margin-bottom: 8px;
+    }
+
+    .progress {
+        height: 7px;
+        background: #292f3d;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        height: 100%;
+        width: 0%;
+        background: #d7b46a;
+        transition: width 0.35s ease;
+    }
+
+    .scene {
+        background: linear-gradient(135deg, #1b2231, #151a27);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 18px;
+        padding: 22px;
+        margin-bottom: 20px;
+    }
+
+    .scene-title {
+        color: #d7b46a;
+        font-size: 13px;
+        font-weight: bold;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: 12px;
+    }
+
+    .question {
+        font-size: clamp(18px, 3vw, 23px);
+        line-height: 1.55;
+        margin: 0;
+    }
+
+    .target {
+        color: #f0ca78;
+        font-weight: bold;
+    }
+
+    .choices {
+        display: grid;
+        gap: 12px;
+    }
+
+    button {
+        font-family: inherit;
+    }
+
+    .choice {
+        width: 100%;
+        text-align: left;
+        padding: 16px 18px;
+        background: #202737;
+        color: #edf1f6;
+        border: 1px solid #343d4f;
+        border-radius: 14px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: 0.18s ease;
+    }
+
+    .choice:hover:not(:disabled) {
+        transform: translateY(-2px);
+        border-color: #d7b46a;
+        background: #262f41;
+    }
+
+    .choice:disabled {
+        cursor: default;
+    }
+
+    .choice.correct {
+        background: #1d3b32;
+        border-color: #5ab28c;
+    }
+
+    .choice.wrong {
+        background: #43282d;
+        border-color: #d4777f;
+    }
+
+    .feedback {
+        min-height: 62px;
+        margin-top: 18px;
+        padding: 15px 17px;
+        border-radius: 13px;
+        background: rgba(255,255,255,0.05);
+        color: #cbd3df;
+        line-height: 1.5;
+        display: none;
+    }
+
+    .feedback.show {
+        display: block;
+    }
+
+    .feedback strong {
+        color: #f0ca78;
+    }
+
+    .next-btn,
+    .start-btn,
+    .restart-btn {
+        border: 0;
+        border-radius: 13px;
+        padding: 13px 21px;
+        background: #d7b46a;
+        color: #14171e;
+        font-weight: bold;
+        font-size: 15px;
+        cursor: pointer;
+        transition: 0.18s ease;
+    }
+
+    .next-btn:hover,
+    .start-btn:hover,
+    .restart-btn:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.08);
+    }
+
+    .next-area {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 18px;
+    }
+
+    .clue-box {
+        margin-top: 24px;
+        border-top: 1px solid rgba(255,255,255,0.08);
+        padding-top: 20px;
+    }
+
+    .clue-title {
+        color: #9da8b9;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        margin-bottom: 10px;
+    }
+
+    .clues {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .clue {
+        padding: 8px 11px;
+        border-radius: 9px;
+        background: #252c3a;
+        color: #e2e6ed;
+        font-size: 13px;
+    }
+
+    .clue.new {
+        animation: cluePop 0.4s ease;
+    }
+
+    @keyframes cluePop {
+        0% { transform: scale(0.8); opacity: 0; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    .start-screen,
+    .result-screen {
+        text-align: center;
+        padding: 55px 28px;
+    }
+
+    .mystery-icon {
+        font-size: 58px;
+        margin-bottom: 16px;
+    }
+
+    .start-screen h2,
+    .result-screen h2 {
+        margin: 0 0 12px;
+        font-size: 30px;
+    }
+
+    .start-screen p,
+    .result-screen p {
+        color: #aeb8c8;
+        line-height: 1.6;
+        max-width: 560px;
+        margin: 0 auto 25px;
+    }
+
+    .score-big {
+        font-size: 54px;
+        font-weight: bold;
+        color: #f0ca78;
+        margin: 10px 0;
+    }
+
+    .rank {
+        font-size: 17px;
+        color: #dce2ea;
+        margin-bottom: 25px;
+    }
+
+    .hidden {
+        display: none !important;
+    }
+
+    @media (max-width: 560px) {
+        body {
+            padding: 10px;
+        }
+
+        .content,
+        .top {
+            padding: 20px;
+        }
+
+        .scene {
+            padding: 18px;
+        }
+
+        .choice {
+            font-size: 15px;
+            padding: 14px;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<div class="game">
+
+    <!-- START SCREEN -->
+    <section id="startScreen" class="start-screen">
+        <div class="mystery-icon">🔎</div>
+        <h2>The Missing Key</h2>
+        <p>
+            A mysterious key has disappeared from the old library.
+            Six clues are hidden in the case file.
+            Solve the English questions and uncover the truth.
+        </p>
+        <button class="start-btn" onclick="startGame()">Open the Case</button>
+    </section>
+
+    <!-- GAME SCREEN -->
+    <section id="gameScreen" class="hidden">
+
+        <div class="top">
+            <div class="case-label">CASE FILE #0610</div>
+            <h1>The Missing Key</h1>
+            <p class="subtitle">
+                Find the clues. Choose the expression that fits the situation.
+            </p>
+
+            <div class="stats">
+                <div class="stat">Score: <span id="score">0</span></div>
+                <div class="stat">Clues: <span id="clueCount">0</span>/6</div>
+                <div class="stat">Lives: <span id="lives">3</span> ♥</div>
+            </div>
+        </div>
+
+        <div class="content">
+
+            <div class="progress-wrap">
+                <div class="progress-info">
+                    <span>Investigation Progress</span>
+                    <span id="questionNumber">1 / 12</span>
+                </div>
+
+                <div class="progress">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+            </div>
+
+            <div class="scene">
+                <div class="scene-title" id="sceneTitle">
+                    Scene 01 — The Library
+                </div>
+
+                <p class="question" id="question"></p>
+            </div>
+
+            <div class="choices" id="choices"></div>
+
+            <div class="feedback" id="feedback"></div>
+
+            <div class="next-area">
+                <button class="next-btn hidden" id="nextBtn" onclick="nextQuestion()">
+                    Continue →
+                </button>
+            </div>
+
+            <div class="clue-box">
+                <div class="clue-title">Evidence Collected</div>
+                <div class="clues" id="clues">
+                    <span class="clue">No clues yet...</span>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- RESULT SCREEN -->
+    <section id="resultScreen" class="result-screen hidden">
+        <div class="mystery-icon" id="resultIcon">🕵️</div>
+        <h2 id="resultTitle">Case Closed</h2>
+
+        <div class="score-big">
+            <span id="finalScore">0</span>
+        </div>
+
+        <div class="rank" id="rank"></div>
+
+        <p id="resultText"></p>
+
+        <button class="restart-btn" onclick="restartGame()">
+            Investigate Again
+        </button>
+    </section>
+
+</div>
+
+<script>
+
+const questions = [
+
+    {
+        scene: "Scene 01 — The Library",
+        question: "Mia is ______ the school library this week. She decides which books students can borrow.",
+        choices: ["in charge of", "take part in", "figure out", "cut down on"],
+        answer: "in charge of",
+        explanation: "<strong>in charge of</strong> means responsible for something or someone.",
+        clue: "A silver key was seen near the library."
+    },
+
+    {
+        scene: "Scene 02 — The Secret Meeting",
+        question: "The detective asked Leo to ______ the investigation meeting.",
+        choices: ["work on", "take part in", "make a difference", "cut down on"],
+        answer: "take part in",
+        explanation: "<strong>take part in</strong> means to participate in something.",
+        clue: "Someone attended the meeting after midnight."
+    },
+
+    {
+        scene: "Scene 03 — The Strange Note",
+        question: "The note was written in code. We need to ______ what it means.",
+        choices: ["work on", "figure out", "take part in", "be in charge of"],
+        answer: "figure out",
+        explanation: "<strong>figure out</strong> means to understand or solve something.",
+        clue: "The note contained the number 17."
+    },
+
+    {
+        scene: "Scene 04 — The Broken Lock",
+        question: "The security team is ______ fixing the old door lock.",
+        choices: ["working on", "taking part in", "cutting down on", "making a difference"],
+        answer: "working on",
+        explanation: "<strong>work on</strong> means to spend time trying to improve, fix, or complete something.",
+        clue: "The lock was damaged but not forced open."
+    },
+
+    {
+        scene: "Scene 05 — The Security Report",
+        question: "The school wants to ______ unnecessary spending this month.",
+        choices: ["figure out", "take part in", "cut down on", "be in charge of"],
+        answer: "cut down on",
+        explanation: "<strong>cut down on</strong> means to reduce the amount of something.",
+        clue: "The missing key was not replaced because of budget cuts."
+    },
+
+    {
+        scene: "Scene 06 — The Final Clue",
+        question: "Even one small clue can ______ when solving a mystery.",
+        choices: ["make a difference", "work on", "take part in", "cut down on"],
+        answer: "make a difference",
+        explanation: "<strong>make a difference</strong> means to have an important effect on a situation.",
+        clue: "The smallest clue changed the whole investigation."
+    },
+
+    {
+        scene: "Scene 07 — The Suspect List",
+        question: "Detective Kim is ______ the case, so everyone reports new information to her.",
+        choices: ["in charge of", "taking part in", "figuring out", "cutting down on"],
+        answer: "in charge of",
+        explanation: "<strong>in charge of</strong> = responsible for controlling or managing something.",
+        clue: "Detective Kim had access to every room."
+    },
+
+    {
+        scene: "Scene 08 — The Witness",
+        question: "Did you ______ the search for the missing key yesterday?",
+        choices: ["work on", "take part in", "make a difference", "figure out"],
+        answer: "take part in",
+        explanation: "<strong>take part in</strong> = participate in an activity or event.",
+        clue: "A student joined the search at 8:17 p.m."
+    },
+
+    {
+        scene: "Scene 09 — The Password",
+        question: "We finally ______ the password after examining the old photographs.",
+        choices: ["cut down on", "make a difference", "figured out", "take part in"],
+        answer: "figured out",
+        explanation: "<strong>figure out</strong> = discover or understand the answer to something.",
+        clue: "The password was hidden in a photograph."
+    },
+
+    {
+        scene: "Scene 10 — The Evidence Room",
+        question: "The detectives need to ______ the evidence before making a decision.",
+        choices: ["work on", "take part in", "cut down on", "be in charge of"],
+        answer: "work on",
+        explanation: "<strong>work on</strong> = spend time dealing with or improving something.",
+        clue: "Three fingerprints were found on the evidence box."
+    },
+
+    {
+        scene: "Scene 11 — The Timeline",
+        question: "We need to ______ the number of suspects before we can solve the case.",
+        choices: ["make a difference", "cut down on", "take part in", "figure out"],
+        answer: "cut down on",
+        explanation: "<strong>cut down on</strong> = reduce the amount or number of something.",
+        clue: "Only two suspects remained."
+    },
+
+    {
+        scene: "Scene 12 — The Truth",
+        question: "Finding the final photograph really ______. It revealed who had the key.",
+        choices: ["worked on", "took part in", "made a difference", "cut down on"],
+        answer: "made a difference",
+        explanation: "<strong>make a difference</strong> = have an important effect on the result.",
+        clue: "The final photograph revealed the truth."
+    }
+
+];
+
+let current = 0;
+let score = 0;
+let lives = 3;
+let clues = [];
+
+function startGame() {
+    document.getElementById("startScreen").classList.add("hidden");
+    document.getElementById("resultScreen").classList.add("hidden");
+    document.getElementById("gameScreen").classList.remove("hidden");
+
+    current = 0;
+    score = 0;
+    lives = 3;
+    clues = [];
+
+    updateStats();
+    showQuestion();
+}
+
+function showQuestion() {
+
+    const q = questions[current];
+
+    document.getElementById("sceneTitle").textContent = q.scene;
+
+    document.getElementById("question").innerHTML =
+        q.question.replace(
+            /in charge of|take part in|figure out|work on|cut down on|make a difference/gi,
+            '<span class="target">______</span>'
+        );
+
+    document.getElementById("questionNumber").textContent =
+        `${current + 1} / ${questions.length}`;
+
+    document.getElementById("progressBar").style.width =
+        `${((current) / questions.length) * 100}%`;
+
+    const choicesContainer = document.getElementById("choices");
+    choicesContainer.innerHTML = "";
+
+    q.choices.forEach(choice => {
+
+        const button = document.createElement("button");
+        button.className = "choice";
+        button.textContent = choice;
+
+        button.onclick = () => checkAnswer(button, choice);
+
+        choicesContainer.appendChild(button);
+    });
+
+    document.getElementById("feedback").classList.remove("show");
+    document.getElementById("feedback").innerHTML = "";
+
+    document.getElementById("nextBtn").classList.add("hidden");
+}
+
+function checkAnswer(button, choice) {
+
+    const q = questions[current];
+    const allChoices = document.querySelectorAll(".choice");
+
+    allChoices.forEach(btn => btn.disabled = true);
+
+    const feedback = document.getElementById("feedback");
+
+    if (choice === q.answer) {
+
+        button.classList.add("correct");
+
+        score += 100;
+
+        if (!clues.includes(q.clue)) {
+            clues.push(q.clue);
+        }
+
+        feedback.innerHTML =
+            `✓ Correct! ${q.explanation}<br><br>
+             <strong>New clue:</strong> ${q.clue}`;
+
+    } else {
+
+        button.classList.add("wrong");
+
+        lives--;
+
+        allChoices.forEach(btn => {
+            if (btn.textContent === q.answer) {
+                btn.classList.add("correct");
+            }
+        });
+
+        feedback.innerHTML =
+            `✗ Not quite. The answer is <strong>${q.answer}</strong>.<br>
+             ${q.explanation}`;
+    }
+
+    feedback.classList.add("show");
+
+    updateStats();
+    updateClues();
+
+    document.getElementById("nextBtn").classList.remove("hidden");
+
+    if (lives <= 0) {
+        document.getElementById("nextBtn").textContent = "See the Result";
+    }
+}
+
+function nextQuestion() {
+
+    if (lives <= 0 || current >= questions.length - 1) {
+        showResult();
+        return;
+    }
+
+    current++;
+
+    if (current === questions.length - 1) {
+        document.getElementById("nextBtn").textContent = "Solve the Case →";
+    }
+
+    showQuestion();
+}
+
+function updateStats() {
+
+    document.getElementById("score").textContent = score;
+    document.getElementById("lives").textContent = lives;
+    document.getElementById("clueCount").textContent = clues.length;
+}
+
+function updateClues() {
+
+    const container = document.getElementById("clues");
+    container.innerHTML = "";
+
+    if (clues.length === 0) {
+        container.innerHTML =
+            '<span class="clue">No clues yet...</span>';
+        return;
+    }
+
+    clues.forEach((clue, index) => {
+
+        const span = document.createElement("span");
+        span.className = "clue new";
+        span.textContent = `Clue ${index + 1}: ${clue}`;
+
+        container.appendChild(span);
+    });
+}
+
+function showResult() {
+
+    document.getElementById("gameScreen").classList.add("hidden");
+    document.getElementById("resultScreen").classList.remove("hidden");
+
+    document.getElementById("finalScore").textContent = score;
+
+    let title;
+    let icon;
+    let text;
+
+    if (score >= 1000 && clues.length >= 10) {
+        title = "Case Cracked!";
+        icon = "🕵️‍♀️";
+        text =
+            "Excellent work. You connected the clues and mastered the key expressions.";
+    } else if (score >= 700) {
+        title = "Mystery Solved!";
+        icon = "🔐";
+        text =
+            "Great detective work! You found most of the clues and handled the expressions well.";
+    } else if (score >= 400) {
+        title = "Almost There!";
+        icon = "🔎";
+        text =
+            "You found some important clues. Review the expressions and try the case again.";
+    } else {
+        title = "The Case Remains Open...";
+        icon = "🌑";
+        text =
+            "The mystery is still unsolved. Try again and look carefully at how each expression is used.";
+    }
+
+    document.getElementById("resultTitle").textContent = title;
+    document.getElementById("resultIcon").textContent = icon;
+    document.getElementById("resultText").textContent = text;
+
+    document.getElementById("rank").textContent =
+        `Evidence collected: ${clues.length} / ${questions.length}`;
+}
+
+function restartGame() {
+    startGame();
+}
+
+</script>
+
+</body>
+</html>
